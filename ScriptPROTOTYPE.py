@@ -1,26 +1,51 @@
+import scapy as sc
 import pandas as pd
-import numpy as np
 from scapy.all import *
-import pyshark
-import os
+import numpy as np
+from operator import itemgetter, attrgetter, methodcaller
 
-try:
-    os.remove('testavimas2.csv')
-except:
-    print("Failo nera")
-
-pysharkas=pyshark.FileCapture('twitteris1.pcap')
-packets=rdpcap('testas1.pcap')  #pcap failas
-ipadress='10.0.2.15'  #IP adresas kompiuterio, iš kuri capturinta
-website=5             #Svetainė, kurioj buvo capturinta(naudoju iškart numerius)
-sessionend=0
-naujasesija = []
-sesijosnr=1
-
-sessions=packets[TCP].sessions()
-
+file=rdpcap('facebookas2.pcap')
+upstream=[]
+downstream=[]
+ipadress='10.0.2.15'
+sessions=file[TCP].sessions()
+sessionsNew=[]
+website=5
 for k, v in sessions.items():
-        print(k)
+    up=0
+    down=0
+    for packet in v:
+        if packet['IP'].src==ipadress:
+            up+=1
+        if packet['IP'].dst==ipadress:
+            down+=1
+
+    if up!=0:
+        upstream.append(v)
+        print(up)
+    if down!=0:
+        downstream.append(v)
+        print(down)
+for i in range(0, len(upstream)):
+    newArray=[]
+    newArray=upstream[i]+downstream[i]
+    sessionsNew.append(newArray)
+
+for session in sessionsNew:
+    session.sort(key=attrgetter('time'))
+
+sessionend=0
+sesijosnr=0
+for v in sessionsNew:
+        wholesession=[]
+        sessionup=[]
+        sessiondown=[]
+        for packet in v:
+            wholesession.append(packet)
+            if packet['IP'].src == ipadress:
+                sessionup.append(packet)
+            if packet['IP'].dst == ipadress:
+                sessiondown.append(packet)
         sessionend+=1
         upcounter = 0  # Upstream packetu counteris
         downcounter = 0  # Downstream packetu counteris
@@ -50,8 +75,8 @@ for k, v in sessions.items():
             if packet['IP'].dst==ipadress:
                 downcounter+=1
         packetcount = len(v)
-        for i in range(0, packetcount - 1):
-            intarv.append(packets[i + 1].time - packets[i].time)
+        for i in range(0, len(wholesession)-1):
+            intarv.append(wholesession[i+1].time - wholesession[i].time)
         intarv.sort()  # Rikiuojami intervalai, nes mediana skaičiuojasi iš surikiuotų duomenų
         half = int(round(len(intarv) / 2))  # Vidurys
         if half==0:
@@ -65,17 +90,17 @@ for k, v in sessions.items():
         # 6punktas
             minintarv = intarv[0]
         # 7punktas pasiruosimas
-        for i in range(0, packetcount):
-            if (packets[i]['IP'].src == ipadress):
-                intarvu.append(packets[i])
-        for i in range(0, packetcount):
-            if (packets[i]['IP'].dst == ipadress):
-                intarvd.append(packets[i])
+   #     for i in range(0, len(sessionup)):
+    #        if (packets[i]['IP'].src == ipadress):
+     #           intarvu.append(packets[i])
+      #  for i in range(0, packetcount):
+       #     if (packets[i]['IP'].dst == ipadress):
+        #        intarvd.append(packets[i])
         # toliau reikia susiskaičiuot intervalus ir ieškot 7... punktų
-        for i in range(0, len(intarvu) - 1):
-            intarvup.append(intarvu[i + 1].time - intarvu[i].time)
-        for i in range(0, len(intarvd) - 1):
-            intarvdown.append((intarvd[i + 1].time - intarvd[i].time))
+        for i in range(0, len(sessionup)-1):
+            intarvup.append(sessionup[i + 1].time - sessionup[i].time)
+        for i in range(0, len(sessiondown)-1):
+            intarvdown.append((sessiondown[i + 1].time - sessiondown[i].time))
         intarvup.sort()
         intarvdown.sort()
         # 7 punktas
@@ -158,10 +183,10 @@ for k, v in sessions.items():
             if packet['IP'].dst == ipadress:
                 timedown += packet.time
 
-        for i in range(0, packetcount - 1):
-            if (packets[i]['IP'].src == packets[i + 1]['IP'].src):
+        for i in range(0, len(wholesession) - 1):
+            if (wholesession[i]['IP'].src == wholesession[i + 1]['IP'].src):
                 temporarychanges += 1
-                temporarytime += packets[i].time
+                temporarytime += wholesession[i].time
             else:
                 temporarychanges = 0
                 temporarytime = 0
@@ -169,28 +194,26 @@ for k, v in sessions.items():
                 changes += 1
                 wholetime += time
 
-        for i in range(0, packetcount - 1):
-            if packets[i]['IP'].src == ipadress:
-                if (packets[i]['IP'].src == packets[i + 1]['IP'].src):
-                    temporarychanges += 1
-                    temporarytime += packets[i].time
-                else:
-                    temporarychanges = 0
-                    temporarytime = 0
-                if temporarychanges == 3:
-                    wholetimeup += time
+        for i in range(0, len(sessionup)-1):
+            if (sessionup[i]['IP'].src == sessionup[i + 1]['IP'].src):
+                temporarychanges += 1
+                temporarytime += sessionup[i].time
+            else:
+                temporarychanges = 0
+                temporarytime = 0
+            if temporarychanges == 3:
+                wholetimeup += time
 
         # 31 punktas
-        for i in range(0, packetcount - 1):
-            if packets[i]['IP'].dst == ipadress:
-                if (packets[i]['IP'].src == packets[i + 1]['IP'].src):
-                    temporarychanges += 1
-                    temporarytime += packets[i].time
-                else:
-                    temporarychanges = 0
-                    temporarytime = 0
-                if temporarychanges == 3:
-                    wholetimedown += time
+        for i in range(0, len(sessiondown)-1):
+            if (sessiondown[i]['IP'].src == sessiondown[i + 1]['IP'].src):
+                temporarychanges += 1
+                temporarytime += sessiondown[i].time
+            else:
+                temporarychanges = 0
+                temporarytime = 0
+            if temporarychanges == 3:
+                wholetimedown += time
 
         print("Paketai visi{}".format(packetcount))
         print("Upstream paketai{}".format(upcounter))
@@ -267,13 +290,3 @@ for k, v in sessions.items():
                                              'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
                                              'duration_bulkmode_up', 'duration_bulkmode_down', 'website'])
         df.to_csv("testavimas2.csv", mode='a', encoding='utf-8', index=False)
-
-for k, v in sessions.items():
-    print(k)
-    print(len(v))
-#Išvedama į .csv failą
-
-
-
-
-
