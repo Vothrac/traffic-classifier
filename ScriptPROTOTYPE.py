@@ -4,13 +4,20 @@ from scapy.all import *
 import numpy as np
 from operator import itemgetter, attrgetter, methodcaller
 
-file=rdpcap('facebookas2.pcap')
+try:
+    os.remove("testavimas2.csv")
+except:
+    print("File not found")
+
+
+file=rdpcap('facebookas3TESTAS.pcap')
 upstream=[]
 downstream=[]
 ipadress='10.0.2.15'
 sessions=file[TCP].sessions()
 sessionsNew=[]
-website=5
+website=3
+limit=20
 for k, v in sessions.items():
     up=0
     down=0
@@ -30,7 +37,7 @@ for i in range(0, len(upstream)):
     newArray=[]
     newArray=upstream[i]+downstream[i]
     sessionsNew.append(newArray)
-
+wholesessiontime=0
 for session in sessionsNew:
     session.sort(key=attrgetter('time'))
 
@@ -46,6 +53,7 @@ for v in sessionsNew:
                 sessionup.append(packet)
             if packet['IP'].dst == ipadress:
                 sessiondown.append(packet)
+            wholesessiontime+=packet.time
         sessionend+=1
         upcounter = 0  # Upstream packetu counteris
         downcounter = 0  # Downstream packetu counteris
@@ -215,6 +223,10 @@ for v in sessionsNew:
             if temporarychanges == 3:
                 wholetimedown += time
 
+        wholetimequote=wholetime/wholesessiontime*100
+        wholetimequoteup=wholetimeup/wholesessiontime*100
+        wholetimequotedown=wholetimedown/wholesessiontime*100
+
         print("Paketai visi{}".format(packetcount))
         print("Upstream paketai{}".format(upcounter))
         print("Downstream paketai{}".format(downcounter))
@@ -241,6 +253,9 @@ for v in sessionsNew:
         print()
         print(sesijosnr)
         sesijosnr+=1
+        print(wholetimequote)
+        print (wholetimequoteup)
+        print(wholetimequotedown)
         print()
 
         raw_data = {'packet_cnt': [packetcount],
@@ -274,6 +289,9 @@ for v in sessionsNew:
                     'duration_bulkmode': [wholetime],
                     'duration_bulkmode_up': [wholetimeup],
                     'duration_bulkmode_down': [wholetimedown],
+                    'qouta_bulkmode':[wholetimequote],
+                    'qouta_bulkmode_upstream':[wholetimequoteup],
+                    'qouta_bulkmode_downstream':[wholetimequotedown],
                     'website': [website]}
         df = pd.DataFrame(raw_data, columns=['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med',
                                              'intarv_time_max',
@@ -288,5 +306,6 @@ for v in sessionsNew:
                                              'bytes_payload_l4_min_down', 'bytes_payload_range_down', 'duration_flow',
                                              'duration_flow_up',
                                              'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
-                                             'duration_bulkmode_up', 'duration_bulkmode_down', 'website'])
+                                             'duration_bulkmode_up', 'duration_bulkmode_down', 'qouta_bulkmode',
+                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream', 'website'])
         df.to_csv("testavimas2.csv", mode='a', encoding='utf-8', index=False)
