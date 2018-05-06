@@ -40,7 +40,7 @@ for i in range(0, len(upstream)):
 wholesessiontime=0
 for session in sessionsNew:
     session.sort(key=attrgetter('time'))
-
+test=0
 sessionend=0
 sesijosnr=0
 for v in sessionsNew:
@@ -54,6 +54,8 @@ for v in sessionsNew:
             if packet['IP'].dst == ipadress:
                 sessiondown.append(packet)
             wholesessiontime+=packet.time
+
+
         sessionend+=1
         upcounter = 0  # Upstream packetu counteris
         downcounter = 0  # Downstream packetu counteris
@@ -153,6 +155,7 @@ for v in sessionsNew:
         print("PAYLOAD: {} PAYLOADDOWN: {} PAYLOADUP: {}".format(len(payload), len(payloaddown), len(payloadup)))
         payload.sort()
         payloaddown.sort()
+        payloadup.sort()
         half = int(round(len(payload) / 2))
         medianpayload = payload[half]
         maximumpayload = payload[-1]
@@ -200,7 +203,7 @@ for v in sessionsNew:
                 temporarytime = 0
             if temporarychanges == 3:
                 changes += 1
-                wholetime += time
+                wholetime += temporarytime
 
         for i in range(0, len(sessionup)-1):
             if (sessionup[i]['IP'].src == sessionup[i + 1]['IP'].src):
@@ -210,22 +213,42 @@ for v in sessionsNew:
                 temporarychanges = 0
                 temporarytime = 0
             if temporarychanges == 3:
-                wholetimeup += time
+                wholetimeup += temporarytime
 
         # 31 punktas
         for i in range(0, len(sessiondown)-1):
-            if (sessiondown[i]['IP'].src == sessiondown[i + 1]['IP'].src):
+            if (sessiondown[i]['IP'].dst == sessiondown[i + 1]['IP'].dst):
                 temporarychanges += 1
                 temporarytime += sessiondown[i].time
             else:
                 temporarychanges = 0
                 temporarytime = 0
             if temporarychanges == 3:
-                wholetimedown += time
+                wholetimedown += temporarytime
 
         wholetimequote=wholetime/wholesessiontime*100
         wholetimequoteup=wholetimeup/wholesessiontime*100
         wholetimequotedown=wholetimedown/wholesessiontime*100
+
+        idlecounter=0
+        idleupcounter=0
+        idledowncounter=0
+        timeidle=0
+        timeidleup=0
+        timeidledown=0
+        for interval in intarv:
+            if interval>=2.0:
+                idlecounter+=1
+                timeidle+=interval
+        for interval in intarvup:
+            if interval>=2:
+                idleupcounter+=1
+                timeidleup+=interval
+        for interval in intarvdown:
+            if interval>=2:
+                idledowncounter+=1
+                timeidledown+=interval
+
 
         print("Paketai visi{}".format(packetcount))
         print("Upstream paketai{}".format(upcounter))
@@ -256,6 +279,12 @@ for v in sessionsNew:
         print(wholetimequote)
         print (wholetimequoteup)
         print(wholetimequotedown)
+        print(idlecounter)
+        print(idleupcounter)
+        print(idledowncounter)
+        print(timeidle)
+        print(timeidleup)
+        print(timeidledown)
         print()
 
         raw_data = {'packet_cnt': [packetcount],
