@@ -1,7 +1,5 @@
 import sys
-import scipy
 import numpy
-import matplotlib
 import pandas
 import sklearn
 import os
@@ -12,7 +10,6 @@ import pandas as pd
 
 import pandas
 from pandas.plotting import scatter_matrix
-import matplotlib.pyplot as plt
 from sklearn import model_selection
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -25,29 +22,40 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 
-
-
 ##DUOMENYS
 data=pandas.read_csv("fit.csv")
-input_data=data[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med','intarv_time_max',
-                                  'intarv_time_min', 'intarv_time_med_up', 'intarv_time_max_up', 'intarv_time_min_up',
-                                  'intarv_time_med_down', 'intarv_time_max_down', 'intarv_time_min_down',
-                                  'bytes_payload_l4_med', 'bytes_payload_l4_max', 'bytes_payload_l4_min', 'bytes_payload_range',
-                                  'bytes_payload_l4_med_up', 'bytes_payload_l4_max_up', 'bytes_payload_l4_min_up','bytes_payload_range_up', 'bytes_payload_l4_med_down', 'bytes_payload_l4_max_down',
-                                  'bytes_payload_l4_min_down', 'bytes_payload_range_down', 'duration_flow', 'duration_flow_up',
-                                  'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
-                                  'duration_bulkmode_up', 'duration_bulkmode_down']]
+input_data=data[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med',
+                                             'intarv_time_max',
+                                             'intarv_time_min', 'intarv_time_med_up', 'intarv_time_max_up',
+                                             'intarv_time_min_up',
+                                             'intarv_time_med_down', 'intarv_time_max_down', 'intarv_time_min_down',
+                                             'bytes_payload_l4_med', 'bytes_payload_l4_max', 'bytes_payload_l4_min',
+                                             'bytes_payload_range',
+                                             'bytes_payload_l4_med_up', 'bytes_payload_l4_max_up',
+                                             'bytes_payload_l4_min_up', 'bytes_payload_range_up',
+                                             'bytes_payload_l4_med_down', 'bytes_payload_l4_max_down',
+                                             'bytes_payload_l4_min_down', 'bytes_payload_range_down', 'duration_flow',
+                                             'duration_flow_up',
+                                             'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
+                                             'duration_bulkmode_up', 'duration_bulkmode_down', 'qouta_bulkmode',
+                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream', 'website']]
 output_data=data[['website']]
 test=pandas.read_csv("testavimas.csv")   #test2 twit, test1 fb
-testav=test[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med','intarv_time_max',
-                                  'intarv_time_min', 'intarv_time_med_up', 'intarv_time_max_up', 'intarv_time_min_up',
-                                  'intarv_time_med_down', 'intarv_time_max_down', 'intarv_time_min_down',
-                                  'bytes_payload_l4_med', 'bytes_payload_l4_max', 'bytes_payload_l4_min', 'bytes_payload_range',
-                                  'bytes_payload_l4_med_up', 'bytes_payload_l4_max_up', 'bytes_payload_l4_min_up','bytes_payload_range_up', 'bytes_payload_l4_med_down', 'bytes_payload_l4_max_down',
-                                  'bytes_payload_l4_min_down', 'bytes_payload_range_down', 'duration_flow', 'duration_flow_up',
-                                  'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
-                                  'duration_bulkmode_up', 'duration_bulkmode_down']]
-## Duomenu tvarkymas
+testav=test[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med',
+                                             'intarv_time_max',
+                                             'intarv_time_min', 'intarv_time_med_up', 'intarv_time_max_up',
+                                             'intarv_time_min_up',
+                                             'intarv_time_med_down', 'intarv_time_max_down', 'intarv_time_min_down',
+                                             'bytes_payload_l4_med', 'bytes_payload_l4_max', 'bytes_payload_l4_min',
+                                             'bytes_payload_range',
+                                             'bytes_payload_l4_med_up', 'bytes_payload_l4_max_up',
+                                             'bytes_payload_l4_min_up', 'bytes_payload_range_up',
+                                             'bytes_payload_l4_med_down', 'bytes_payload_l4_max_down',
+                                             'bytes_payload_l4_min_down', 'bytes_payload_range_down', 'duration_flow',
+                                             'duration_flow_up',
+                                             'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
+                                             'duration_bulkmode_up', 'duration_bulkmode_down', 'qouta_bulkmode',
+                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream', 'website']]
 #print(input_data)
 validation_size=0.5 # Testavimo dydis
 seed=50
