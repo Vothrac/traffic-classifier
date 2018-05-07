@@ -38,7 +38,10 @@ input_data=data[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_
                                              'duration_flow_up',
                                              'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
                                              'duration_bulkmode_up', 'duration_bulkmode_down', 'qouta_bulkmode',
-                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream', 'website']]
+                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream',
+                                             'time_in_idle_mode', 'time_in_idle_mode_upstream', 'time_in_idle_mode_downstream',
+                                             'time_in_idle_mode_qouta', 'time_in_idle_mode_qouta_up',
+                                             'time_in_idle_mode_qouta_down']]
 output_data=data[['website']]
 test=pandas.read_csv("testavimas.csv")   #test2 twit, test1 fb
 testav=test[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med',
@@ -55,7 +58,10 @@ testav=test[['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med'
                                              'duration_flow_up',
                                              'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
                                              'duration_bulkmode_up', 'duration_bulkmode_down', 'qouta_bulkmode',
-                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream', 'website']]
+                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream',
+                                             'time_in_idle_mode', 'time_in_idle_mode_upstream', 'time_in_idle_mode_downstream',
+                                             'time_in_idle_mode_qouta', 'time_in_idle_mode_qouta_up',
+                                             'time_in_idle_mode_qouta_down']]
 #print(input_data)
 validation_size=0.5 # Testavimo dydis
 seed=50
