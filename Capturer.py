@@ -10,7 +10,7 @@ cap=pyshark.LiveCapture(interface='4', output_file=file)
 cap.sniff(timeout=20)
 for pkt in cap:
     print(pkt)
-exit(0)
+
 
 
 
