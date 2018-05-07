@@ -3,17 +3,18 @@ import pandas as pd
 from scapy.all import *
 import numpy as np
 from operator import itemgetter, attrgetter, methodcaller
-
+import pyshark as pk
 try:
     os.remove("testavimas2.csv")
 except:
     print("File not found")
 
 
-file=rdpcap('facebookas3TESTAS.pcap')
+
+file=rdpcap('pyshark.pcap')
 upstream=[]
 downstream=[]
-ipadress='10.0.2.15'
+ipadress='192.168.0.237'
 sessions=file[TCP].sessions()
 sessionsNew=[]
 website=3
@@ -204,7 +205,8 @@ for v in sessionsNew:
             if temporarychanges == 3:
                 changes += 1
                 wholetime += temporarytime
-
+        temporarytime=0
+        wholetimeup=0
         for i in range(0, len(sessionup)-1):
             if (sessionup[i]['IP'].src == sessionup[i + 1]['IP'].src):
                 temporarychanges += 1
@@ -214,10 +216,10 @@ for v in sessionsNew:
                 temporarytime = 0
             if temporarychanges == 3:
                 wholetimeup += temporarytime
-
+        temporarytime=0
         # 31 punktas
         for i in range(0, len(sessiondown)-1):
-            if (sessiondown[i]['IP'].dst == sessiondown[i + 1]['IP'].dst):
+            if (sessiondown[i]['IP'].src == sessiondown[i + 1]['IP'].src):
                 temporarychanges += 1
                 temporarytime += sessiondown[i].time
             else:
@@ -225,30 +227,32 @@ for v in sessionsNew:
                 temporarytime = 0
             if temporarychanges == 3:
                 wholetimedown += temporarytime
-
+        wholesessiontimeup=0
+        wholesessiontimedown=0
+        for packet in sessionup:
+            wholesessiontimeup+=packet.time
+        for packet in sessiondown:
+            wholesessiontimedown+=packet.time
         wholetimequote=wholetime/wholesessiontime*100
-        wholetimequoteup=wholetimeup/wholesessiontime*100
-        wholetimequotedown=wholetimedown/wholesessiontime*100
+        wholetimequoteup=wholetimeup/wholesessiontimeup*100
+        wholetimequotedown=wholetimedown/wholesessiontimedown*100
 
-        idlecounter=0
-        idleupcounter=0
-        idledowncounter=0
         timeidle=0
         timeidleup=0
         timeidledown=0
         for interval in intarv:
-            if interval>=2.0:
-                idlecounter+=1
+            if interval>=2:
                 timeidle+=interval
         for interval in intarvup:
             if interval>=2:
-                idleupcounter+=1
                 timeidleup+=interval
         for interval in intarvdown:
             if interval>=2:
-                idledowncounter+=1
                 timeidledown+=interval
 
+        idletimeqouta=timeidle/wholesessiontime*100
+        idletimeqoutaup=timeidleup/wholesessiontimeup*100
+        idletimeqoutadown=timeidledown/wholesessiontimedown*100
 
         print("Paketai visi{}".format(packetcount))
         print("Upstream paketai{}".format(upcounter))
@@ -279,12 +283,12 @@ for v in sessionsNew:
         print(wholetimequote)
         print (wholetimequoteup)
         print(wholetimequotedown)
-        print(idlecounter)
-        print(idleupcounter)
-        print(idledowncounter)
         print(timeidle)
         print(timeidleup)
         print(timeidledown)
+        print(idletimeqouta)
+        print(idletimeqoutaup)
+        print(idletimeqoutadown)
         print()
 
         raw_data = {'packet_cnt': [packetcount],
@@ -321,6 +325,12 @@ for v in sessionsNew:
                     'qouta_bulkmode':[wholetimequote],
                     'qouta_bulkmode_upstream':[wholetimequoteup],
                     'qouta_bulkmode_downstream':[wholetimequotedown],
+                    'time_in_idle_mode':[timeidle],
+                    'time_in_idle_mode_upstream':[timeidleup],
+                    'time_in_idle_mode_downstream':[timeidledown],
+                    'time_in_idle_mode_qouta':[idletimeqouta],
+                    'time_in_idle_mode_qouta_up':[idletimeqoutaup],
+                    'time_in_idle_mode_qouta_down':[idletimeqoutadown],
                     'website': [website]}
         df = pd.DataFrame(raw_data, columns=['packet_cnt', 'packet_cnt_up', 'packet_cnt_down', 'intarv_time_med',
                                              'intarv_time_max',
@@ -336,5 +346,8 @@ for v in sessionsNew:
                                              'duration_flow_up',
                                              'duration_flow_down', 'changes_bulktrans_mode', 'duration_bulkmode',
                                              'duration_bulkmode_up', 'duration_bulkmode_down', 'qouta_bulkmode',
-                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream', 'website'])
+                                             'qouta_bulkmode_upstream', 'qouta_bulkmode_downstream',
+                                             'time_in_idle_mode', 'time_in_idle_mode_upstream', 'time_in_idle_mode_downstream',
+                                             'time_in_idle_mode_qouta', 'time_in_idle_mode_qouta_up',
+                                             'time_in_idle_mode_qouta_down' ,'website'])
         df.to_csv("testavimas2.csv", mode='a', encoding='utf-8', index=False)
